@@ -1,18 +1,14 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
-generator client {
-  provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
-}
+// generator client {
+//   provider = "prisma-client-js"
+//   output   = "../src/generated/prisma"
+// }
 
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
+// datasource db {
+//   provider = "postgresql"
+//   url      = env("DATABASE_URL")
+// }
 
 model User {
   id        Int      @id @default(autoincrement())
@@ -20,3 +16,79 @@ model User {
   name      String?
   createdAt DateTime @default(now())
 }
+
+
+
+
+
+
+
+// schema.prisma
+
+
+
+// gpt converted table
+// schema.prisma
+
+
+
+// 1. Days of the week enum
+enum Day {
+    sunday
+    monday
+    tuesday
+    wednesday
+    thursday
+    friday
+    saturday
+}
+
+// 2. Events table
+model Event {
+  id               String   @id @default(uuid()) @db.Uuid
+  name             String
+  description      String?       // optional
+  durationInMinutes Int
+  clerkUserId      String
+  isActive         Boolean @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([clerkUserId])
+}
+
+// 3. Schedules table
+model Schedule {
+  id           String   @id @default(uuid()) @db.Uuid
+  timezone     String
+  clerkUserId  String   @unique
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  availabilities ScheduleAvailability[]
+}
+
+// 4. ScheduleAvailability table
+model ScheduleAvailability {
+  id         String   @id @default(uuid()) @db.Uuid
+  scheduleId String   @db.Uuid // 👈 MATCH type of Schedule.id
+  startTime  String
+  endTime    String
+  dayOfWeek  Day
+
+  schedule   Schedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+
+  @@index([scheduleId])
+}
+
+
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
